@@ -1,0 +1,71 @@
+services:
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    environment: 
+      DATALAKE_ADDR: localhost:9091  
+    ports:
+      - 80:80
+
+  registry:
+    image: registry:2
+    container_name: registry
+    ports:
+      - 5001:5000
+    volumes:
+      - ./registry:/var/lib/registry
+
+  artemis:
+    build: 
+      context: artemis-docker/_TMP_/artemis/2.29.0/
+      dockerfile: docker/Dockerfile-ubuntu-11
+    container_name: artemis
+    ports:
+      - 61616:61616
+      - 8161:8161
+    networks:
+      - openzdm
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_DB: apicurio-registry
+      POSTGRES_USER: apicurio
+      POSTGRES_PASSWORD: openzdm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - openzdm
+#    ports:
+#      - 5432:5432
+ 
+  adminer:
+    image: adminer
+    ports:
+      - 8082:8080
+    networks:
+      - openzdm
+
+  apicurio:
+    image: apicurio/apicurio-registry-sql:latest-release
+    depends_on: 
+      - postgres
+    container_name: apicurio
+    networks:
+      - openzdm
+    ports:
+      - 8080:8080
+    environment:
+      REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgres/apicurio-registry
+      REGISTRY_DATASOURCE_USERNAME: apicurio
+      REGISTRY_DATASOURCE_PASSWORD: openzdm
+
+
+networks:
+  openzdm:
+    external: true
+
+volumes:
+  pgdata:
