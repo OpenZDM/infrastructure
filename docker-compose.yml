@@ -8,14 +8,6 @@ services:
     ports:
       - 80:80
 
-  registry:
-    image: registry:2
-    container_name: registry
-    ports:
-      - 5001:5000
-    volumes:
-      - ./registry:/var/lib/registry
-
   artemis:
     build: 
       context: artemis-docker/_TMP_/artemis/2.29.0/
