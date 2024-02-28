@@ -3,13 +3,13 @@ services:
     image: nginx
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    environment: 
-      DATALAKE_ADDR: localhost:9091  
+    environment:
+      DATALAKE_ADDR: localhost:9091
     ports:
       - 80:80
 
   artemis:
-    build: 
+    build:
       context: artemis-docker/_TMP_/artemis/2.29.0/
       dockerfile: docker/Dockerfile-ubuntu-11
     container_name: artemis
@@ -32,7 +32,7 @@ services:
       - openzdm
 #    ports:
 #      - 5432:5432
- 
+
   adminer:
     image: adminer
     ports:
@@ -42,7 +42,7 @@ services:
 
   apicurio:
     image: apicurio/apicurio-registry-sql:latest-release
-    depends_on: 
+    depends_on:
       - postgres
     container_name: apicurio
     networks:
@@ -54,6 +54,15 @@ services:
       REGISTRY_DATASOURCE_USERNAME: apicurio
       REGISTRY_DATASOURCE_PASSWORD: openzdm
 
+  nats:
+    image: nats:latest
+    container_name: nats
+    ports:
+      - "4222:4222" # Client port
+      - "8222:8222" # HTTP monitoring port
+      - "6222:6222" # Cluster port
+    networks:
+      - openzdm
 
 networks:
   openzdm:
