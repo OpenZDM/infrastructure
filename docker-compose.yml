@@ -30,15 +30,25 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - openzdm
-#    ports:
-#      - 5432:5432
 
-  adminer:
-    image: adminer
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
     ports:
-      - 8082:8080
-    networks:
-      - openzdm
+      - "1883:1883" #default mqtt port
+      # - "9001:9001" #default mqtt port for websockets
+    volumes:
+      - ./config:/mosquitto/config:rw
+      - ./data:/mosquitto/data:rw
+      - ./log:/mosquitto/log:rw
+    restart: always
+
+  # adminer:
+  #   image: adminer
+  #   ports:
+  #     - 8082:8080
+  #   networks:
+  #     - openzdm
 
   apicurio:
     image: apicurio/apicurio-registry-sql:latest-release
