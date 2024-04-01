@@ -1,2 +1,4 @@
 _TMP_
 registry
+mosquitto/data
+mosquitto/log

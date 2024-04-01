@@ -5,19 +5,10 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     environment:
       DATALAKE_ADDR: localhost:9091
-    ports:
-      - 80:80
-
-  artemis:
-    build:
-      context: artemis-docker/_TMP_/artemis/2.29.0/
-      dockerfile: docker/Dockerfile-ubuntu-11
-    container_name: artemis
-    ports:
-      - 61616:61616
-      - 8161:8161
     networks:
       - openzdm
+    ports:
+      - 80:80
 
   postgres:
     image: postgres
@@ -38,10 +29,12 @@ services:
       - "1883:1883" #default mqtt port
       # - "9001:9001" #default mqtt port for websockets
     volumes:
-      - ./config:/mosquitto/config:rw
-      - ./data:/mosquitto/data:rw
-      - ./log:/mosquitto/log:rw
+      - ./mosquitto/config:/mosquitto/config:rw
+      - ./mosquitto/data:/mosquitto/data:rw
+      - ./mosquitto/log:/mosquitto/log:rw
     restart: always
+    networks:
+      - openzdm
 
   registry:
     image: registry:2
