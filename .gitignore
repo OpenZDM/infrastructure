@@ -2,3 +2,5 @@ _TMP_
 registry
 mosquitto/data
 mosquitto/log
+portainer_cert
+portainer_data
