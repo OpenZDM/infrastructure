@@ -1,23 +1,17 @@
 services:
-  nginx:
-    image: nginx
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    environment: 
-      DATALAKE_ADDR: localhost:9091  
-    ports:
-      - 80:80
-
-  artemis:
-    build: 
-      context: artemis-docker/_TMP_/artemis/2.29.0/
-      dockerfile: docker/Dockerfile-ubuntu-11
-    container_name: artemis
-    ports:
-      - 61616:61616
-      - 8161:8161
-    networks:
-      - openzdm
+  # nginx:
+  #   image: nginx
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/ssl/selfsigned.crt:/etc/nginx/ssl/selfsigned.crt:ro
+  #     - ./nginx/ssl/selfsigned.key:/etc/nginx/ssl/selfsigned.key:ro
+  #   networks:
+  #     - openzdm
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   ports:
+  #     - 80:80
+  #     - 443:443
 
   postgres:
     image: postgres
@@ -26,23 +20,59 @@ services:
       POSTGRES_DB: apicurio-registry
       POSTGRES_USER: apicurio
       POSTGRES_PASSWORD: openzdm
+    ports:
+      - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
-    networks:
-      - openzdm
-#    ports:
-#      - 5432:5432
- 
-  adminer:
-    image: adminer
-    ports:
-      - 8082:8080
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
     networks:
       - openzdm
 
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - "1883:1883" #default mqtt port
+      # - "9001:9001" #default mqtt port for websockets
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:rw
+      - ./mosquitto/data:/mosquitto/data:rw
+      - ./mosquitto/log:/mosquitto/log:rw
+    restart: always
+    networks:
+      - openzdm
+
+  registry:
+    image: registry:2
+    container_name: registry
+    restart: always
+    ports:
+      - 5001:5000
+    volumes:
+      - ./registry:/var/lib/registry
+
+  # portainer:
+  #   image: portainer/portainer-ce:latest
+  #   container_name: portainer
+  #   restart: always
+  #   ports:
+  #     - 9443:9443
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /home/viniciusbelloli/Estudos/OpenZDM/infrastructure/portainer_data:/data
+  #     - /home/viniciusbelloli/Estudos/OpenZDM/infrastructure/portainer_cert:/certs
+  #   command: --sslcert /certs/portainer.crt --sslkey /certs/portainer.key
+
+  # adminer:
+  #   image: adminer
+  #   ports:
+  #     - 8082:8080
+  #   networks:
+  #     - openzdm
+
   apicurio:
     image: apicurio/apicurio-registry-sql:latest-release
-    depends_on: 
+    depends_on:
       - postgres
     container_name: apicurio
     networks:
@@ -53,7 +83,23 @@ services:
       REGISTRY_DATASOURCE_URL: jdbc:postgresql://postgres/apicurio-registry
       REGISTRY_DATASOURCE_USERNAME: apicurio
       REGISTRY_DATASOURCE_PASSWORD: openzdm
+      CORS_ALLOWED_ORIGINS: '*'
 
+  nats:
+    image: nats:latest
+    container_name: nats
+    environment:
+      - NATS_MAX_PAYLOAD=1048576
+      - NATS_MAX_CONNECTIONS=10000
+    ports:
+      - "4222:4222" # Client port
+      - "8222:8222" # HTTP monitoring port
+      - "6222:6222" # Cluster port
+    volumes:
+      - ./nats-server.conf:/etc/nats/nats-server.conf
+    command: -c /etc/nats/nats-server.conf
+    networks:
+      - openzdm
 
 networks:
   openzdm:
