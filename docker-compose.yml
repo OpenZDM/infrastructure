@@ -1,17 +1,17 @@
 services:
-  nginx:
-    image: nginx
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl/selfsigned.crt:/etc/nginx/ssl/selfsigned.crt:ro
-      - ./nginx/ssl/selfsigned.key:/etc/nginx/ssl/selfsigned.key:ro
-    networks:
-      - openzdm
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - 80:80
-      - 443:443
+  # nginx:
+  #   image: nginx
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/ssl/selfsigned.crt:/etc/nginx/ssl/selfsigned.crt:ro
+  #     - ./nginx/ssl/selfsigned.key:/etc/nginx/ssl/selfsigned.key:ro
+  #   networks:
+  #     - openzdm
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   ports:
+  #     - 80:80
+  #     - 443:443
 
   postgres:
     image: postgres
@@ -51,17 +51,17 @@ services:
     volumes:
       - ./registry:/var/lib/registry
 
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    restart: always
-    ports:
-      - 9443:9443
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /home/viniciusbelloli/Estudos/OpenZDM/infrastructure/portainer_data:/data
-      - /home/viniciusbelloli/Estudos/OpenZDM/infrastructure/portainer_cert:/certs
-    command: --sslcert /certs/portainer.crt --sslkey /certs/portainer.key
+  # portainer:
+  #   image: portainer/portainer-ce:latest
+  #   container_name: portainer
+  #   restart: always
+  #   ports:
+  #     - 9443:9443
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /home/viniciusbelloli/Estudos/OpenZDM/infrastructure/portainer_data:/data
+  #     - /home/viniciusbelloli/Estudos/OpenZDM/infrastructure/portainer_cert:/certs
+  #   command: --sslcert /certs/portainer.crt --sslkey /certs/portainer.key
 
   # adminer:
   #   image: adminer
